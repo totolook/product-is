@@ -17,16 +17,15 @@ jobs:
 
     steps:
       - name: Clone product IS
-        run: |
-          git clone https://github.com/wso2/product-is
+        uses: actions/checkout@v3
       - name: Set up Adopt JDK 11
         uses: actions/setup-java@v2
         with:
           java-version: "11"
           distribution: "adopt"
+          cache: 'maven'
       - name: Product-IS build with JDK 11 without Integration Tests
         run: |
-          cd product-is/
           mvn clean install --batch-mode -Dmaven.test.skip=true | tee mvn-build.log
       - name: Minio upload
         # You may pin to the exact commit or the version.
@@ -34,11 +33,11 @@ jobs:
         uses: lovellfelix/minio-deploy-action@v1.1.1
         with:
           # Minio endpoint of object storage host
-          endpoint: pippo.it
+          endpoint: ${{ secrets.MINO_URL }}
           # Minio access key (username)
-          access_key: aaa
+          access_key: ${{ secrets.MINO_ACCESS }}
           # Minio secret key (password)
-          secret_key: aaaa
+          secret_key: ${{ secrets.MINO_SECRET }}
           # Set the target minio bucket for deployment.
           bucket: release-git
           # Set an input directory for deployment.
