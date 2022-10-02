@@ -28,31 +28,20 @@ jobs:
         run: |
           cd product-is/
           mvn clean install --batch-mode -Dmaven.test.skip=true | tee mvn-build.log
-      - name: Set up Adopt JDK 17
-        uses: actions/setup-java@v2
+      - name: Minio upload
+        # You may pin to the exact commit or the version.
+        # uses: lovellfelix/minio-deploy-action@cfc4b36780804138fc0df64d8e862ed28db7fd34
+        uses: lovellfelix/minio-deploy-action@v1.1.1
         with:
-          java-version: "17"
-          distribution: "adopt"
-      - name: Product-IS build with JDK 17 with Integration Tests
-        run: |
-          ls
-          cd product-is/modules/integration/
-          mvn clean install --batch-mode | tee mvn-build.log
-          PR_BUILD_STATUS=$(cat mvn-build.log | grep "\[INFO\] BUILD" | grep -oE '[^ ]+$')
-          PR_TEST_RESULT=$(sed -n -e '/\[INFO\] Results:/,/\[INFO\] Tests run:/ p' mvn-build.log)
-          PR_BUILD_FINAL_RESULT=$(
-            echo "==========================================================="
-            echo "product-is BUILD $PR_BUILD_STATUS"
-            echo "=========================================================="
-            echo ""
-            echo "$PR_TEST_RESULT"
-          )
-          PR_BUILD_RESULT_LOG_TEMP=$(echo "$PR_BUILD_FINAL_RESULT" | sed 's/$/%0A/')
-          PR_BUILD_RESULT_LOG=$(echo $PR_BUILD_RESULT_LOG_TEMP)
-          echo "::warning::$PR_BUILD_RESULT_LOG"
-          PR_BUILD_SUCCESS_COUNT=$(grep -o -i "\[INFO\] BUILD SUCCESS" mvn-build.log | wc -l)
-          if [ "$PR_BUILD_SUCCESS_COUNT" != "3" ]; then
-            echo "PR BUILD not successfull. Aborting."
-            echo "::error::PR BUILD not successfull. Check artifacts for logs."
-            exit 1
-          fi
+          # Minio endpoint of object storage host
+          endpoint: pippo.it
+          # Minio access key (username)
+          access_key: aaa
+          # Minio secret key (password)
+          secret_key: aaaa
+          # Set the target minio bucket for deployment.
+          bucket: release-git
+          # Set an input directory for deployment.
+          source_dir: modules/distribution/target
+          # Set a target directory for deployment (with a leading slash).
+          target_dir: / # optional, default is /
