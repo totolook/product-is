@@ -24,6 +24,13 @@ jobs:
           java-version: "11"
           distribution: "adopt"
           cache: 'maven'
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Product-IS build with JDK 11 without Integration Tests
         run: |
           mvn clean install --batch-mode -Dmaven.test.skip=true | tee mvn-build.log
